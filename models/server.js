@@ -16,6 +16,7 @@ class Server {
 
         //Rutas de la apliacion
         this.usuariosPath = '/api/users'
+        this.authPath = '/api/auth'
         this.routes()
     }
 
@@ -41,6 +42,7 @@ class Server {
         })*/
 
         this.app.use(this.usuariosPath, require('../routes/users.routes'))
+        this.app.use(this.authPath, require('../routes/auth.routes'))
     }
 
     listen() {

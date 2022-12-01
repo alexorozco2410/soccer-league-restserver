@@ -88,15 +88,19 @@ const postUsers = async(req, res = response) => {
 const delUsers = async(req, res = response) => {
 
     const { id } = req.params
+    // const uid = req.uid
 
     // borrar fisicamente 
     // const user = await User.findByIdAndDelete( id )
 
     const user = await User.findByIdAndUpdate( id, { status: false } )
+    const authUser = req.authUser
 
     res.json({
         msg: "Delete API - Controller",
-        user
+        user,
+        // uid
+        authUser
     })
 }
 
