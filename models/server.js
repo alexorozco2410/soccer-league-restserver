@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const { dbConnection } = require('../database/config')
+const fileUpload = require('express-fileupload')
 
 class Server {
 
@@ -15,8 +16,15 @@ class Server {
         this.middlewares()
 
         //Rutas de la apliacion
-        this.usuariosPath = '/api/users'
-        this.authPath = '/api/auth'
+        //this.usuariosPath = '/api/users'
+        //this.authPath = '/api/auth'
+
+        this.paths = {
+            authPath: '/api/auth',
+            usersPath: '/api/users',
+            playersPath: '/api/players',
+            teamsPath: '/api/teams'
+        }
         this.routes()
     }
 
@@ -31,6 +39,12 @@ class Server {
         this.app.use( express.json() )
         //directorio publico
         this.app.use(express.static('public'))
+        // Fileupload - carga de archivos
+        this.app.use( fileUpload({
+            useTempFiles: true,
+            tempFileDir: '/tmp/',
+            createParentPath: true,
+        }))
     }
 
     routes() {
@@ -41,8 +55,10 @@ class Server {
             })
         })*/
 
-        this.app.use(this.usuariosPath, require('../routes/users.routes'))
-        this.app.use(this.authPath, require('../routes/auth.routes'))
+        this.app.use(this.paths.usersPath, require('../routes/users.routes'))
+        this.app.use(this.paths.authPath, require('../routes/auth.routes'))
+        this.app.use(this.paths.playersPath, require('../routes/players.routes'))
+        this.app.use(this.paths.teamsPath, require('../routes/teams.routes'))
     }
 
     listen() {

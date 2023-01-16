@@ -2,6 +2,7 @@ const { response, request } = require('express')
 const bcrypt = require('bcryptjs')
 
 const User = require('../models/user.model')
+const { generateDiscriminator } = require('../helpers/generate-discriminator')
 
 const getUsers = async(req = request, res = response) => {
 
@@ -37,7 +38,7 @@ const getUsers = async(req = request, res = response) => {
 const putUsers = async(req, res = response) => {
 
     const id = req.params.id
-    const { password, google, ...rest } = req.body
+    const { password, ...rest } = req.body
 
     //validar con base de datos
     if ( password ) {
@@ -55,11 +56,6 @@ const putUsers = async(req, res = response) => {
 
 const postUsers = async(req, res = response) => {
 
-    
-
-    const { name, password, email, role } = req.body
-    const user = new User({ name, password, email, role })
-
     /*Verificar si el correo existe
     se pasara esta funcionalidad a helpers y se utilizara
     la funcion en las rutas
@@ -71,18 +67,34 @@ const postUsers = async(req, res = response) => {
         })
     }
     */
+    
+    try {
+        const { userName, name, lastName, password, email, role } = req.body
+        const user = new User({ userName, name, lastName, password, email, role })
+        const tag = await generateDiscriminator( user._id, userName )
 
-    //Encriptar la contraseña
-    const salt = bcrypt.genSaltSync()
-    user.password = bcrypt.hashSync( password, salt )
+        user.discriminator = tag
+        
+        //Encriptar la contraseña
+        const salt = bcrypt.genSaltSync()
 
-    //guardar en BD
-    await user.save()
+        user.password = bcrypt.hashSync( password, salt )
 
-    res.json({
-        msg: "Post API - Controller",
-        user
-    })
+        //guardar en BD
+        await user.save()
+
+        res.json({
+            msg: "Post API - Controller",
+            user
+        })
+
+    } catch(error) {
+        console.log(error)
+        res.json({
+            msg: "Hable con el administrador de la base de datos",
+        })
+    }
+    
 }
 
 const delUsers = async(req, res = response) => {

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const UserModel = require('../models/user.model')
 
 const { generateJWT } = require('../helpers/generate-jwt')
+const { generateDiscriminator } = require('../helpers/generate-discriminator')
 
 const login = async( req = request, res = response ) => {
 
@@ -50,6 +51,58 @@ const login = async( req = request, res = response ) => {
     }
 }
 
+const revalidateJWT = async( req = request, res = response ) => {
+
+    try {
+        const authUser = req.authUser
+        const newJwt = await generateJWT( authUser._id )
+        res.json({
+            user: authUser,
+            token: newJwt
+        })
+
+    } catch(error) {
+        console.log(error)
+        return res.status(500).json({
+            msg: 'Hable con el administrador'
+        })
+    }
+}
+
+const register = async( req = request, res = response ) => {
+    try {
+        const { userName, name, lastName, password, email } = req.body
+        const role = 'USER_ROLE'
+        const user = new UserModel({ userName, name, lastName, password, email, role })
+        const tag = await generateDiscriminator( user._id, userName )
+
+        user.discriminator = tag
+        
+        //Encriptar la contraseña
+        const salt = bcrypt.genSaltSync()
+
+        user.password = bcrypt.hashSync( password, salt )
+
+        //guardar en BD
+        await user.save()
+
+        const token = await generateJWT( user._id )
+
+        res.json({
+            msg: "registro completado",
+            user,
+            token
+        })
+
+    } catch(error) {
+        console.log(error)
+        res.json({
+            msg: "Hable con el administrador de la base de datos",
+        })
+    }
+}
 module.exports = {
-    login
+    login,
+    revalidateJWT,
+    register,
 }

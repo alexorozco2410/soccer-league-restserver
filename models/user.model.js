@@ -2,9 +2,17 @@
 const { Schema, model } = require('mongoose')
 
 const UserSchema = Schema({
+    userName: {
+        type: String,
+        required: [true, 'El nombre es obligatorio']
+    },
     name: {
         type: String,
         required: [true, 'El nombre es obligatorio']
+    },
+    lastName: {
+        type: String,
+        required: [true, 'El apellido es obligatorio']
     },
     email: {
         type: String,
@@ -18,6 +26,7 @@ const UserSchema = Schema({
     },
     img: {
         type: String,
+        default: null,
     },
     role: {
         type: String,
@@ -28,9 +37,13 @@ const UserSchema = Schema({
         type: Boolean,
         default: true
     },
-    google: {
-        type: Boolean,
-        default: false
+    discriminator: {
+        type: String,
+        default: '0000'
+    },
+    age: {
+        type: Number,
+        default: 18
     }
 })
 
